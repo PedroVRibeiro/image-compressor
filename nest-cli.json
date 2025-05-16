@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/upload-service/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/upload-service/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/upload-service",
+  "projects": {
+    "compressor-service": {
+      "type": "application",
+      "root": "apps/compressor-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/compressor-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/compressor-service/tsconfig.app.json"
+      }
+    },
+    "upload-service": {
+      "type": "application",
+      "root": "apps/upload-service",
+      "entryFile": "main",
+      "sourceRoot": "apps/upload-service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/upload-service/tsconfig.app.json"
+      }
+    }
+  }
+}
