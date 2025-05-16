@@ -12,7 +12,7 @@ export class CompressorController {
     console.log('Image received:', data);
     
     try {
-      const outputPaths = await this.compressorService.compress(data.path, data.filename)
+      const outputPaths = await this.compressorService.compress(data.path, data.filename, data.taskId)
       console.log('The resulting images are saved at:')
        outputPaths.forEach((p) => console.log(' -', p));
     } catch (error) {
