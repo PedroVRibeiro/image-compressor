@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { CompressorServiceModule } from './compressor-service.module';
+import { CompressorModule } from './compressor.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(CompressorServiceModule);
+  const app = await NestFactory.create(CompressorModule);
   await app.listen(process.env.port ?? 3000);
 }
 bootstrap();
