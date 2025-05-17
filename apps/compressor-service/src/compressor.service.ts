@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import path from 'path';
-import fs from 'fs'
-import sharp from 'sharp';
+import fs from 'fs';
+import sharp, { Metadata } from 'sharp';
 import { InjectModel } from '@nestjs/mongoose';
-import { CompressionTask, CompressionTaskDocument } from './database/compression-task.schema';
+import {
+  CompressionTask,
+  CompressionTaskDocument,
+} from './database/compression-task.schema';
 import { Model } from 'mongoose';
 import { saveCompressionTask } from './database/mongo-helpers';
 
@@ -11,16 +14,21 @@ import { saveCompressionTask } from './database/mongo-helpers';
 export class CompressorService {
   constructor(
     @InjectModel(CompressionTask.name)
-    private readonly taskModel: Model<CompressionTaskDocument>
-  ) { }
+    private readonly taskModel: Model<CompressionTaskDocument>,
+  ) {}
 
-  async compress(inputPath: string, filename: string, taskId: string): Promise<string[]> {
-    const image = sharp(inputPath);
-    const metadata = await image.metadata();
+  async compress(
+    fileName: string,
+    taskId: string,
+    buffer: number[],
+  ): Promise<string[]> {
+    const payloadBuffer = Buffer.from(buffer);
+    const image = sharp(payloadBuffer);
+    const metadata: Metadata = await image.metadata();
 
-    const baseName = path.parse(filename).name;
-    const ext = path.extname(filename).toLowerCase();
-    const outputDir = path.resolve(process.cwd(), 'compressed')
+    const baseName = path.parse(fileName).name;
+    const ext = path.extname(fileName).toLowerCase();
+    const outputDir = path.resolve(process.cwd(), `compressed/${taskId}`);
 
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -40,10 +48,14 @@ export class CompressorService {
           const outputFilename = `${baseName}-${label}${ext}`;
           const outputPath = path.resolve(outputDir, outputFilename);
 
-          await image.clone().resize({ width: 1280 }).jpeg({ quality }).toFile(outputPath);
+          await image
+            .clone()
+            .resize({ width: 1280 })
+            .jpeg({ quality })
+            .toFile(outputPath);
 
           const { size } = fs.statSync(outputPath);
-          const dimensions = await sharp(outputPath).metadata();
+          const dimensions: Metadata = await sharp(outputPath).metadata();
 
           outputPaths.push(outputPath);
 
@@ -59,7 +71,7 @@ export class CompressorService {
 
       await saveCompressionTask(this.taskModel, {
         taskId,
-        filename,
+        fileName,
         metadata,
         status: 'COMPLETED',
         versions,
@@ -67,7 +79,7 @@ export class CompressorService {
     } catch (error) {
       await saveCompressionTask(this.taskModel, {
         taskId,
-        filename,
+        fileName,
         status: 'FAILED',
         metadata,
         versions: [],
