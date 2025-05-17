@@ -1,25 +1,24 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { lastValueFrom } from 'rxjs';
+import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
+import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
+import { ImageTaskPayload } from '@shared/shared/interfaces/image-task-payload.interface';
 
 @Injectable()
 export class UploadService {
-  constructor(@Inject('IMAGE_QUEUE') private readonly client: ClientProxy) {}
+  constructor(private readonly rabbitMQService: RabbitMQService) {}
 
-  public async upload(file: Express.Multer.File): Promise<string> {
+  public upload(file: Express.Multer.File): string {
     const taskId = uuidv4();
 
-    const payload = {
+    const payload: ImageTaskPayload = {
       taskId,
-      originalName: file.originalname,
-      filename: file.filename,
+      fileName: file.originalname,
       mimetype: file.mimetype,
-      path: file.path,
+      buffer: Array.from(file.buffer),
       status: 'PENDING',
     };
 
-    await lastValueFrom(this.client.emit('image.uploaded', payload));
+    this.rabbitMQService.publishToQueue(payload);
 
     return taskId;
   }

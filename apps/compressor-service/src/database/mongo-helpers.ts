@@ -1,25 +1,17 @@
 import { Model } from 'mongoose';
-import { Metadata } from 'sharp';
 import { CompressionTaskDocument } from './compression-task.schema';
-
-interface CompressionTaskInterface {
-  taskId: string;
-  filename: string;
-  status: 'COMPLETED' | 'FAILED';
-  metadata: Metadata;
-  versions: any[];
-  errorMessage?: string;
-}
+import { CompressionTaskInterface } from '../interfaces/compression-task.interface';
 
 export async function saveCompressionTask(
   model: Model<CompressionTaskDocument>,
   options: CompressionTaskInterface,
 ) {
-  const { taskId, filename, status, metadata, versions, errorMessage } = options;
+  const { taskId, fileName, status, metadata, versions, errorMessage } =
+    options;
 
   await model.create({
     task_id: taskId,
-    original_filename: filename,
+    original_filename: fileName,
     status,
     processed_at: new Date(),
     error_message: errorMessage,
