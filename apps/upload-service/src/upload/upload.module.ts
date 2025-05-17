@@ -1,24 +1,10 @@
 import { Module } from '@nestjs/common';
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 
 @Module({
-  imports: [
-    ClientsModule.register([
-      {
-        name: 'IMAGE_QUEUE',
-        transport: Transport.RMQ,
-        options: {
-          urls: ['amqp://localhost:5672'],
-          queue: 'image-processing',
-          queueOptions: {
-            durable: true,
-          },
-        },
-      },
-    ]),
-  ],
+  imports: [RabbitMQModule],
   controllers: [UploadController],
   providers: [UploadService],
 })
