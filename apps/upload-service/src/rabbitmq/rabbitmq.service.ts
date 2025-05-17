@@ -4,19 +4,28 @@ import {
   OnModuleDestroy,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as amqplib from 'amqplib';
 import pRetry from 'p-retry';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RabbitMQService.name);
+
+  constructor(private readonly configService: ConfigService) {}
+
+  private RABBITMQ_URL: string;
+  private QUEUE_NAME: string;
+
   private connection: amqplib.Connection;
   private channel: amqplib.Channel;
 
-  private readonly RABBITMQ_URL = 'amqp://localhost:5672';
-  private readonly QUEUE_NAME = 'image-processing';
-
   async onModuleInit() {
+    this.RABBITMQ_URL =
+      this.configService.get<string>('RABBITMQ_URL') || 'amqp://localhost:5672';
+    this.QUEUE_NAME =
+      this.configService.get<string>('QUEUE_NAME') || 'image-processing';
+
     await this.connectWithRetry();
   }
 

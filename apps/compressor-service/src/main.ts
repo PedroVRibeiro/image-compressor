@@ -4,7 +4,8 @@ import { CompressorModule } from './compressor.module';
 async function bootstrap() {
   const app = await NestFactory.create(CompressorModule);
 
-  await app.listen(3002);
-  console.log('image-compressor microservice is listening...');
+  const port = process.env.PORT || 3002;
+  await app.listen(port);
+  console.log(`image-compressor microservice is listening on port ${port}`);
 }
 bootstrap();

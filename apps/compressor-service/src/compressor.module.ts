@@ -7,10 +7,22 @@ import {
   CompressionTaskSchema,
 } from './database/compression-task.schema';
 import { RabbitMQConsumer } from './rabbitmq/rabbitmq-consumer.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/image-db'),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        uri:
+          config.get<string>('MONGO_URL') ||
+          'mongodb://localhost:27017/image-db',
+      }),
+    }),
     MongooseModule.forFeature([
       { name: CompressionTask.name, schema: CompressionTaskSchema },
     ]),
