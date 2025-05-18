@@ -95,7 +95,6 @@ export class CompressorService {
         status: 'FAILED',
         metadata,
         versions: [],
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         errorMessage: error.message,
       });
     }

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as amqplib from 'amqplib';
-import pRetry from 'p-retry';
+import { connectWithRetry } from 'libs/shared/rabbitmq/rabbitmq-connector';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
@@ -26,33 +26,20 @@ export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
     this.QUEUE_NAME =
       this.configService.get<string>('QUEUE_NAME') || 'image-processing';
 
-    await this.connectWithRetry();
+    const { connection, channel } = await connectWithRetry(
+      this.RABBITMQ_URL,
+      this.QUEUE_NAME,
+      this.logger,
+    );
+
+    this.connection = connection;
+    this.channel = channel;
   }
 
   async onModuleDestroy() {
     await this.channel?.close();
     await this.connection?.close();
     this.logger.log('RabbitMQ connection closed gracefully');
-  }
-
-  private async connectWithRetry() {
-    await pRetry(
-      async () => {
-        this.logger.log('Trying to connect to RabbitMQ...');
-        this.connection = await amqplib.connect(this.RABBITMQ_URL);
-        this.channel = await this.connection.createChannel();
-
-        await this.channel.assertQueue(this.QUEUE_NAME, {
-          durable: true,
-        });
-        this.logger.log('Connected to RabbitMQ successfully');
-      },
-      {
-        retries: 5,
-        factor: 2,
-        minTimeout: 2000,
-      },
-    );
   }
 
   publishToQueue(data: any) {

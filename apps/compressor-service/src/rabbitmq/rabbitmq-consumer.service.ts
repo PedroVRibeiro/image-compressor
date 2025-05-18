@@ -1,12 +1,15 @@
 import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import * as amqplib from 'amqplib';
 import { CompressorService } from '../compressor.service';
 import { ConfigService } from '@nestjs/config';
 import { ImageTaskPayload } from 'libs/shared/interfaces/image-task-payload.interface';
+import { connectWithRetry } from 'libs/shared/rabbitmq/rabbitmq-connector'; // adjust path accordingly
 
 @Injectable()
 export class RabbitMQConsumer implements OnModuleInit {
   private readonly logger = new Logger(RabbitMQConsumer.name);
+
+  private connection;
+  private channel;
 
   constructor(
     private readonly compressorService: CompressorService,
@@ -21,46 +24,32 @@ export class RabbitMQConsumer implements OnModuleInit {
     const QUEUE_NAME =
       this.configService.get<string>('QUEUE_NAME') || 'image-processing';
 
-    for (let attempt = 1; attempt <= 5; attempt++) {
-      try {
-        this.logger.log(
-          `Attempt ${attempt}: Connecting to RabbitMQ at ${RABBITMQ_URL}`,
-        );
+    const { connection, channel } = await connectWithRetry(
+      RABBITMQ_URL,
+      QUEUE_NAME,
+      this.logger,
+    );
 
-        const connection = await amqplib.connect(RABBITMQ_URL);
-        const channel = await connection.createChannel();
-        await channel.assertQueue(QUEUE_NAME, { durable: true });
+    this.connection = connection;
+    this.channel = channel;
 
-        this.logger.log(`Listening to queue "${QUEUE_NAME}"...`);
+    this.logger.log(`Listening to queue "${QUEUE_NAME}"...`);
 
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        await channel.consume(QUEUE_NAME, async (msg) => {
-          if (msg) {
-            try {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              const payload: ImageTaskPayload = JSON.parse(
-                msg.content.toString(),
-              );
-              this.logger.log(`Received task: ${payload.taskId}`);
+    await this.channel.consume(QUEUE_NAME, async (msg) => {
+      if (msg) {
+        try {
+          const payload: ImageTaskPayload = JSON.parse(msg.content.toString());
+          this.logger.log(`Received task: ${payload.taskId}`);
 
-              const { fileName, taskId, buffer } = payload;
+          const { fileName, taskId, buffer } = payload;
+          await this.compressorService.compress(fileName, taskId, buffer);
 
-              await this.compressorService.compress(fileName, taskId, buffer);
-
-              channel.ack(msg);
-            } catch (err) {
-              this.logger.error('Failed to process message', err);
-              channel.nack(msg, false, false);
-            }
-          }
-        });
-
-        break;
-      } catch (err) {
-        this.logger.error('Failed to connect to RabbitMQ', err);
-        if (attempt === 5) throw err;
-        await new Promise((res) => setTimeout(res, 5000));
+          this.channel.ack(msg);
+        } catch (err) {
+          this.logger.error('❌ Failed to process message', err);
+          this.channel.nack(msg, false, false); // optional: push to DLQ
+        }
       }
-    }
+    });
   }
 }
