@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
 import { CompressorService } from './compressor.service';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { ImageTaskPayload } from 'libs/shared/interfaces/image-task-payload.interface';
@@ -22,5 +22,14 @@ export class CompressorController {
     } catch (error) {
       console.error('Processing Error:', error);
     }
+  }
+
+  @Get('status/:taskId')
+  async getStatus(@Param('taskId') taskId: string) {
+    const task = await this.compressorService.getTaskStatus(taskId);
+
+    if (!task) throw new NotFoundException(`Task ${taskId} not found`);
+
+    return task;
   }
 }

@@ -101,4 +101,8 @@ export class CompressorService {
 
     return outputPaths;
   }
+
+  async getTaskStatus(taskId: string): Promise<CompressionTask | null> {
+    return this.taskModel.findOne({ task_id: taskId }).lean();
+  }
 }
