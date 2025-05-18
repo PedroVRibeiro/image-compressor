@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import path from 'path';
 import fs from 'fs';
 import sharp, { Metadata } from 'sharp';
@@ -12,6 +12,8 @@ import { saveCompressionTask } from './database/mongo-helpers';
 
 @Injectable()
 export class CompressorService {
+  private readonly logger = new Logger(CompressorService.name);
+
   constructor(
     @InjectModel(CompressionTask.name)
     private readonly taskModel: Model<CompressionTaskDocument>,
@@ -22,13 +24,17 @@ export class CompressorService {
     taskId: string,
     buffer: number[],
   ): Promise<string[]> {
+    this.logger.log(
+      `[CompressorService] START: ${fileName} for task ${taskId}`,
+    );
+
     const payloadBuffer = Buffer.from(buffer);
     const image = sharp(payloadBuffer);
     const metadata: Metadata = await image.metadata();
 
     const baseName = path.parse(fileName).name;
     const ext = path.extname(fileName).toLowerCase();
-    const outputDir = path.resolve(process.cwd(), `compressed/${taskId}`);
+    const outputDir = path.resolve(process.cwd(), 'compressed', taskId);
 
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -59,6 +65,8 @@ export class CompressorService {
 
           outputPaths.push(outputPath);
 
+          this.logger.log(`[CompressorService] Writing: ${outputPath}`);
+
           return {
             label,
             path: outputPath,
@@ -76,6 +84,10 @@ export class CompressorService {
         status: 'COMPLETED',
         versions,
       });
+
+      this.logger.log(
+        `[CompressorService] DONE: ${outputPaths.length} images saved`,
+      );
     } catch (error) {
       await saveCompressionTask(this.taskModel, {
         taskId,
