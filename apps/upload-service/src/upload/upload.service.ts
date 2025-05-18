@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { RabbitMQService } from '../rabbitmq/rabbitmq.service';
-import { ImageTaskPayload } from '@shared/shared/interfaces/image-task-payload.interface';
+import { ImageTaskPayload } from 'libs/shared/interfaces/image-task-payload.interface';
 
 @Injectable()
 export class UploadService {

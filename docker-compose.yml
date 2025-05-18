@@ -1,0 +1,61 @@
+services:
+  upload-service:
+    build:
+      context: .
+      dockerfile: ./apps/upload-service/Dockerfile
+    container_name: upload-service
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/upload-service/.env
+    depends_on:
+      - rabbitmq
+    networks:
+      - backend
+
+  compressor-service:
+    build:
+      context: .
+      dockerfile: ./apps/compressor-service/Dockerfile
+    container_name: compressor-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./apps/compressed:/usr/src/app/compressed
+    env_file:
+      - ./apps/compressor-service/.env
+    depends_on:
+      - rabbitmq
+      - mongo
+    networks:
+      - backend
+
+  mongo:
+    image: mongo:5
+    container_name: image-compressor-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: image-compressor-rabbitmq
+    ports:
+      - "5672:5672"       # RabbitMQ protocol
+      - "15672:15672"     # Web UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - backend
+
+volumes:
+  mongo_data:
+    name: image-compresssor-mongo-data
+
+networks:
+  backend:
+    driver: bridge

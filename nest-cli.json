@@ -4,7 +4,7 @@
   "sourceRoot": "apps/upload-service/src",
   "compilerOptions": {
     "deleteOutDir": true,
-    "webpack": true,
+    "webpack": false,
     "tsConfigPath": "apps/upload-service/tsconfig.app.json"
   },
   "monorepo": true,
