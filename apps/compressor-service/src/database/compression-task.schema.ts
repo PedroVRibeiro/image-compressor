@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
 import { ImageVersion, ImageVersionSchema } from './image-version.schema';
 
 export type CompressionTaskDocument = CompressionTask & Document;

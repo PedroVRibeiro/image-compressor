@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
 import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
-import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [

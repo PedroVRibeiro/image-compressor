@@ -1,4 +1,5 @@
 import { Model } from 'mongoose';
+
 import { CompressionTaskDocument } from './compression-task.schema';
 import { CompressionTaskInterface } from '../interfaces/compression-task.interface';
 
