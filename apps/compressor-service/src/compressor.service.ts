@@ -1,13 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
-import path from 'path';
 import fs from 'fs';
-import sharp, { Metadata } from 'sharp';
+import path from 'path';
+
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import sharp, { Metadata } from 'sharp';
+
 import {
   CompressionTask,
   CompressionTaskDocument,
 } from './database/compression-task.schema';
-import { Model } from 'mongoose';
 import { saveCompressionTask } from './database/mongo-helpers';
 
 @Injectable()
@@ -88,14 +90,16 @@ export class CompressorService {
       this.logger.log(
         `[CompressorService] DONE: ${outputPaths.length} images saved`,
       );
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
       await saveCompressionTask(this.taskModel, {
         taskId,
         fileName,
         status: 'FAILED',
         metadata,
         versions: [],
-        errorMessage: error.message,
+        errorMessage: message,
       });
     }
 
