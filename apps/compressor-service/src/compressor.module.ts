@@ -1,13 +1,14 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { CompressorController } from './compressor.controller';
 import { CompressorService } from './compressor.service';
-import { MongooseModule } from '@nestjs/mongoose';
 import {
   CompressionTask,
   CompressionTaskSchema,
 } from './database/compression-task.schema';
 import { RabbitMQConsumer } from './rabbitmq/rabbitmq-consumer.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
-// compression-task.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+
 import { CompressionTask } from './compression-task.schema';
 
 export type CompressionTaskDocument = CompressionTask & Document;

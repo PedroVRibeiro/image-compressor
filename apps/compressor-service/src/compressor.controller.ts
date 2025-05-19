@@ -1,7 +1,8 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
-import { CompressorService } from './compressor.service';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { ImageTaskPayload } from 'libs/shared/interfaces/image-task-payload.interface';
+
+import { CompressorService } from './compressor.service';
 
 @Controller()
 export class CompressorController {

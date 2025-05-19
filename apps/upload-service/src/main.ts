@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+
 import { UploadModule } from './upload/upload.module';
 
 async function bootstrap() {

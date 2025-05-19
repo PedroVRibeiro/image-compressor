@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+
 import { CompressorModule } from './compressor.module';
 
 async function bootstrap() {

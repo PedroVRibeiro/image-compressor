@@ -3,6 +3,7 @@ import eslint from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import * as importPlugin from 'eslint-plugin-import';
 
 export default tseslint.config(
   {
@@ -23,6 +24,9 @@ export default tseslint.config(
         tsconfigRootDir: import.meta.dirname,
       },
     },
+    plugins: {
+      import: importPlugin,
+    },
   },
   {
     rules: {
@@ -31,7 +35,24 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'warn',
       '@typescript-eslint/no-unsafe-call': 'warn',
-      '@typescript-eslint/no-unsafe-member-access': 'warn'
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
+       'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',      // Node.js built-ins
+            'external',     // NPM packages
+            'internal',     // Aliased or internal modules
+            ['parent', 'sibling', 'index'], // Relative
+            'object',       // Side-effect imports
+          ],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
     },
   },
 );

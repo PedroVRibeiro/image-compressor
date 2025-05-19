@@ -4,8 +4,9 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { UploadService } from './upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+
+import { UploadService } from './upload.service';
 import { uploadConfig } from '../config/upload';
 import { UploadResponse } from '../interfaces/upload';
 import { validateImageFile } from '../utils/validateImageFile';
