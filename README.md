@@ -44,11 +44,17 @@ Pequeno serviço de compressão de imagens em pub/sub, no qual um publisher efet
 2. **Acesse o diretório dos microserviços**
 
 ```bash
-cd image-compressor/apps
+cd apps/
 ```
 
-3. **Em cada serviço (upload-service e compressor-service) renomeie o arquivo .env.example**
+3. **Acesse o diretório de cada serviço (upload-service e compressor-service) e renomeie o arquivo .env.example para .env**
 
+```bash
+cd upload-service/
+E
+cd compressor-service/
+```
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**e então:**
 ```bash
 CMD (Windows): rename .env.example .env
 ```
